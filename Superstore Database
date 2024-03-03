@@ -28,12 +28,13 @@ VALUES
     (15, 'Cozy Throw Blanket', 'Furnishings', 24.99, 100, 4.2);
 
 #For this project, I used SQL to query the Superstore database to get information about items sold at the store and their prices.
-#Part 1: Write your own SQL query that uses a statement to order the items by price.
+
+--Part 1: Write your own SQL query that uses a statement to order the items by price:
 SELECT *
 FROM superstore
 ORDER BY price;
 
-#Part 2: Write your own SQL query that will show a statistic about the item prices, like a sum, average, minimum, maximum, or count
+--Part 2: Write your own SQL query that will show a statistic about the item prices, like a sum, average, minimum, maximum, or count:
 SELECT SUM(price)
 FROM superstore;
 
@@ -49,7 +50,7 @@ FROM superstore;
 SELECT MAX(price)
 FROM superstore;
 
-#Part 3: Write your own SQL query that will show a statistic about the price for items in the category of "Kitchen Supplies"
+--Part 3: Write your own SQL query that will show a statistic about the price for items in the category of "Kitchen Supplies":
 SELECT 
     MIN(price) AS min_price,
     MAX(price) AS max_price,
@@ -58,8 +59,13 @@ SELECT
 FROM superstore
 WHERE category = 'Kitchen Supplies';
 
-#Part 4: What is the average rating of items in the 'Electronics' category?
+--Part 4: What is the average rating of items in the 'Electronics' category?:
 SELECT AVG(average_rating) AS average_rating
 FROM superstore
 WHERE category = 'Electronics';
-#How can these results answer business problems or help a business out? Leveraging SQL queries in the Superstore dataset provides several benefits. For example, identifying top-performing categories guides inventory and marketing strategies. Analyzing prices ensures competitiveness and maximizes revenue. Monitoring stock levels against demand optimizes inventory efficiency. Targeted campaigns based on customer preferences drive sales. Finally, comparing metrics against competitors informs strategic decisions for maintaining market competitiveness. In essence, SQL enables the Superstore to extract actionable insights, facilitating informed decision-making across various business aspects.
+
+--How can these results answer business problems or help a business out? 
+--Leveraging SQL queries in the Superstore dataset provides several benefits. For example, identifying top-performing categories guides inventory and marketing strategies.
+Analyzing prices ensures competitiveness and maximizes revenue. Monitoring stock levels against demand optimizes inventory efficiency. Targeted campaigns based on customer 
+preferences drive sales. Finally, comparing metrics against competitors informs strategic decisions for maintaining market competitiveness. In essence, SQL enables the 
+Superstore to extract actionable insights, facilitating informed decision-making across various business aspects.
