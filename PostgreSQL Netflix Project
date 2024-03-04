@@ -84,7 +84,7 @@ SELECT count(*)
 FROM "netflix_titles_info"
 WHERE type='Movie';
 
---When was the most recent batch of tv shows and/or movies added to the database?:
+--When was the most recent batch of tv shows and/or movies added to the database?
 select max(date(date_added))
 FROM "netflix_titles_info";
 
@@ -110,6 +110,6 @@ FROM "netflix_titles_info"
 WHERE type = 'Movie');
 
 --How can these results answer business problems or help a business out?
---Understanding the data behind Netflix analytics can aid in content curation by enhancing recommendation systems and guide content acquisition for streaming platforms. 
+--Understanding the data behind Netflix analytics can aid in content curation by enhancing recommendation systems and guiding content acquisition for streaming platforms. 
 It aids in targeted marketing which can tailor marketing campaigns towards audiences interests in cinema. We can even facilitate strategic partnerships and brand positioning 
 for brands associated with cinema. 
