@@ -51,6 +51,12 @@ WHERE Feb.Quantity>2
 AND length(orderid) = 6
 AND orderid <> 'Order ID';
 
+--List all the products sold in Los Angeles in February, and include how many of each were sold:
+SELECT Product, SUM(quantity)
+FROM FebSales
+WHERE location like '%Los Angeles%'
+GROUP BY Product
+
 --How can these results answer business problems or help a business out?
 --This information can help identify high-value customers who make bulk purchases, allowing the business to tailor marketing strategies or loyalty programs to retain these 
 customers. Knowing the popular products sold at a specific location during a particular period can help optimize inventory management and marketing efforts for those products.
