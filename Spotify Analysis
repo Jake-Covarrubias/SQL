@@ -1,0 +1,122 @@
+# For this project, I downloaded Spotify data from Kaggle.
+# Then I created a table to insert Spotify data into.
+# Finally, I performed analytics on the data using SQL. 
+
+#Creating the table: 
+CREATE TABLE BIT_DB.Spotifydata (
+id integer PRIMARY KEY,
+artist_name varchar NOT NULL,
+track_name varchar NOT NULL,
+track_id varchar NOT NULL,
+popularity integer NOT NULL,
+danceability decimal(4,3) NOT NULL,
+energy decimal(4,3) NOT NULL,
+key integer NOT NULL,
+loudness decimal(5,3) NOT NULL,
+mode integer NOT NULL,
+speechiness decimal(5,4) NOT NULL,
+acousticness decimal(6,5) NOT NULL,
+instrumentalness text NOT NULL,
+liveness decimal(5,4) NOT NULL,
+valence decimal(4,3) NOT NULL,
+tempo decimal(6,3) NOT NULL,
+duration_ms integer NOT NULL,
+time_signature integer NOT NULL 
+)
+
+#Then I inserted the Spotify Data .csv into the table.
+
+#Next, I explored the data using the following SQL. 
+
+--Average danceability by artist and track:
+SELECT artist_name, AVG(danceability) AS avg_danceability
+FROM spotifydata
+GROUP BY artist_name, track_name;
+
+--Top 10 artists based on popularity:
+SELECT artist_name, SUM(popularity) AS total_popularity
+FROM Spotifydata
+GROUP BY artist_name
+ORDER BY total_popularity DESC
+LIMIT 10;
+
+--Artist who released the longest song:
+SELECT artist_name, track_name, duration_ms AS Duration_minutes
+FROM Spotifydata
+ORDER BY duration_ms DESC
+LIMIT 1;
+
+--Average danceability for the 10 most popular songs:
+SELECT AVG(danceability) AS avg_danceability
+FROM (SELECT *
+    FROM Spotifydata
+    ORDER BY popularity DESC
+    LIMIT 10) AS popular_tracks;
+    
+--Find Artists with High Average Danceability:
+WITH artist_avg_danceability AS (
+    SELECT artist_name, AVG(danceability) AS avg_danceability
+    FROM Spotifydata
+    GROUP BY artist_name)
+SELECT artist_name, avg_danceability
+FROM artist_avg_danceability
+WHERE avg_danceability > (
+    SELECT AVG(avg_danceability) FROM artist_avg_danceability);
+
+--Identifying Top 10 Artists with Consistently High Popularity;
+SELECT popular_artists.artist_name
+FROM (
+    SELECT artist_name, COUNT(*) AS total_tracks
+    FROM Spotifydata
+    GROUP BY artist_name
+    HAVING AVG(popularity) > 70
+) AS popular_artists
+JOIN (
+    SELECT artist_name, COUNT(*) AS total_tracks
+    FROM Spotifydata
+    GROUP BY artist_name
+) AS all_artists ON popular_artists.artist_name = all_artists.artist_name
+WHERE popular_artists.total_tracks = all_artists.total_tracks
+LIMIT 10;
+
+--Finding Tracks Released by Artists with Most Popular Tracks:
+WITH top_artists AS (
+SELECT artist_name
+FROM Spotifydata
+GROUP BY artist_name
+ORDER BY SUM(popularity) DESC
+LIMIT 5
+)
+SELECT track_name, artist_name, popularity
+FROM Spotifydata
+WHERE artist_name IN (SELECT artist_name FROM top_artists)
+ORDER BY popularity DESC;
+
+--Calculating the Average Duration of Tracks for Each Artist:
+SELECT artist_name, ROUND(AVG(duration_ms)*2) AS avg_duration_ms
+FROM (
+    SELECT artist_name, track_name, duration_ms,
+           ROW_NUMBER() OVER(PARTITION BY artist_name ORDER BY duration_ms DESC) AS rn
+    FROM Spotifydata
+) AS ranked_tracks
+WHERE rn <= 3
+GROUP BY artist_name;
+
+--Avg popularity, danceability, and energy by artist and track:
+SELECT
+artist_name
+,track_name
+,avg(popularity)
+,avg(danceability)
+,avg(energy)
+FROM spotifydata
+GROUP BY artist_name, track_name;
+
+--How can these results answer business problems or help a business out? 
+--By knowing which artists and tracks have higher danceability scores, platforms can create playlists tailored to users' tastes and moods, leading to increased user engagement 
+and satisfaction. Businesses can partner with popular artists for brand endorsements, sponsorships, or event appearances to reach a wider audience and enhance brand visibility. 
+Knowing which artist released the longest song can help radio stations schedule programming, advertisers choose appropriate slots, and streaming platforms optimize playlist 
+lengths to maintain user engagement. By analyzing the danceability of popular songs, businesses can curate playlists for events, clubs, or workouts, ensuring a lively atmosphere 
+and enhancing the overall experience for attendees or users. Each of these insights derived from SQL queries can assist businesses in making data-driven decisions, improving 
+customer satisfaction, and maximizing opportunities for revenue generation and brand growth within the music industry. Additionally, these analyses can contribute to the 
+development of targeted marketing strategies, personalized recommendations, and strategic partnerships, ultimately driving business success and competitive advantage.
