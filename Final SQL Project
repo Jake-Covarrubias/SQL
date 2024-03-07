@@ -1,0 +1,159 @@
+#In this SQL, I'm querying a database to quantify statistics about 'Chinook' sales.
+
+--Show Customers (their full names, customer ID, and country) who are not in the US:
+SELECT FirstName, LastName, CustomerId, Country 
+FROM chinook.customers 
+WHERE Country != "USA";
+
+--Show only the Customers from Brazil:
+SELECT * FROM chinook.customers 
+WHERE Country = "Brazil";
+
+--Find the Invoices of customers who are from Brazil. The resulting table should show the customer's full name, Invoice ID, Date of the invoice, and billing country:
+SELECT cust.FirstName, cust.LastName, inv.InvoiceId, inv.BillingCountry, inv.InvoiceDate
+FROM chinook.invoices as inv 
+LEFT JOIN chinook.customers as cust 
+on inv.CustomerId = cust.CustomerId 
+WHERE inv.BillingCountry = "Brazil";
+
+--Show the Employees who are Sales Agents:
+SELECT * FROM chinook.Employees
+WHERE Title = "Sales Support Agent";
+
+--Find a unique/distinct list of billing countries from the Invoice table:
+SELECT DISTINCT BillingCountry FROM chinook.Invoices;
+
+--Provide a query that shows the invoices associated with each sales agent. The resulting table should include the Sales Agent's full name:
+SELECT emp.LastName, emp.Firstname, inv.InvoiceId
+FROM chinook.Employees emp 
+JOIN chinook.Customers cust ON cust.SupportRepId = emp.EmployeeId
+JOIN chinook.Invoices Inv ON Inv.CustomerId = cust.CustomerId;
+
+--Show the Invoice Total, Customer name, Country, and Sales Agent name for all invoices and customers:
+SELECT emp.LastName, emp.Firstname, cust.FirstName, cust.LastName, cust.Country, inv.total
+FROM chinook.employees emp 
+JOIN chinook.Customers cust ON cust.SupportRepId = emp.EmployeeId
+JOIN chinook.Invoices Inv ON Inv.CustomerId = cust.CustomerId;
+
+--How many Invoices were there in 2009?
+SELECT COUNT(*) AS total_invoices
+FROM chinook.Invoices
+WHERE InvoiceDate BETWEEN '2009-01-01' AND '2009-12-31';
+
+--What are the total sales for 2009?
+SELECT ROUND(SUM(Total), 2) AS total_sales
+FROM chinook.Invoices
+WHERE InvoiceDate BETWEEN '2009-01-01' AND '2009-12-31';
+
+--Write a query that includes the purchased track name with each invoice line ID:
+SELECT t.Name, i.InvoiceLineId
+FROM chinook.Invoice_items i
+JOIN chinook.Tracks t 
+ON i.TrackId = t.TrackId;
+
+--Write a query that includes the purchased track name AND artist name with each invoice line ID:
+SELECT ar.name as Artist, t.Name as Track, i.InvoiceLineId
+FROM chinook.Invoice_items i
+LEFT JOIN chinook.tracks t 
+ON i.TrackID=t.TrackID
+INNER JOIN chinook.albums a
+ON a.AlbumID=t.AlbumID
+LEFT JOIN chinook.artists ar
+ON ar.ArtistID=a.ArtistID;
+
+--Provide a query that shows all the Tracks, and include the Album name, Media type, and Genre.
+SELECT t.Name AS 'Track Name', a.Title AS 'Album Title', m.Name AS 'Media Type', g.Name AS 'Genre'
+FROM chinook.tracks t
+JOIN chinook.Albums a 
+on a.AlbumId = t.AlbumId
+JOIN chinook.Media_Types m
+on m.MediaTypeId = t.MediaTypeId
+JOIN chinook.Genres g
+on g.GenreId = t.GenreId;
+
+--Show the total sales made by each sales agent:
+SELECT emp.FirstName, emp.LastName,
+ROUND(SUM(Inv.Total), 2) as 'Total Sales' 
+FROM chinook.Employees emp
+
+JOIN chinook.Customers cust 
+ON cust.SupportRepId = emp.EmployeeId
+
+JOIN chinook.Invoices Inv 
+ON Inv.CustomerId = cust.CustomerId
+
+WHERE emp.Title = 'Sales Support Agent' 
+GROUP BY emp.FirstName;
+
+--Which sales agent made the most dollars in sales in 2009?
+SELECT emp.FirstName, emp.LastName,
+ROUND(SUM(Inv.Total), 2) as 'Total Sales' 
+FROM chinook.Employees emp
+
+JOIN chinook.Customers cust 
+ON cust.SupportRepId = emp.EmployeeId
+
+JOIN chinook.Invoices Inv 
+ON Inv.CustomerId = cust.CustomerId
+
+WHERE emp.Title = 'Sales Support Agent' 
+AND Inv.InvoiceDate LIKE '2009%' 
+GROUP BY emp.FirstName
+ORDER BY (round(sum(Inv.Total), 2))  DESC LIMIT 1;
+
+--Find the top 3 genres with the highest total sales:
+SELECT g.Name AS Genre, ROUND(SUM(ii.UnitPrice * ii.Quantity),2) AS TotalSales
+FROM chinook.genres g
+JOIN tracks t ON g.GenreId = t.GenreId
+JOIN invoice_items ii ON t.TrackId = ii.TrackId
+GROUP BY g.Name
+ORDER BY TotalSales DESC
+LIMIT 3;
+
+--Calculate the average number of tracks per album:
+SELECT CAST(AVG(NumTracks) AS INT) AS AvgTracksPerAlbum
+FROM (
+    SELECT AlbumId, COUNT(*) AS NumTracks 
+    FROM chinook.tracks 
+    GROUP BY AlbumId
+) AS TrackCounts;
+
+--Find the top 3 bestselling albums including the artist name and total sales:
+SELECT a.Title AS AlbumTitle, ar.Name AS ArtistName, ROUND(SUM(ii.UnitPrice * ii.Quantity),2) AS TotalSales
+FROM chinook.albums AS a
+JOIN chinook.artists AS ar ON a.ArtistId = ar.ArtistId
+JOIN chinook.tracks AS t ON a.AlbumId = t.AlbumId
+JOIN chinook.invoice_items AS ii ON t.TrackId = ii.TrackId
+GROUP BY a.AlbumId
+ORDER BY TotalSales DESC
+LIMIT 3;
+
+--Show the total sales for each year:
+SELECT strftime('%Y', InvoiceDate) AS Year, ROUND(SUM(Total),2) AS TotalSales
+FROM chinook.invoices
+GROUP BY strftime('%Y', InvoiceDate);
+
+--List the top 3 most frequently purchased tracks and their purchase count: 
+SELECT t.Name AS TrackName, COUNT(*) AS PurchaseCount
+FROM chinook.tracks t
+JOIN invoice_items ii ON t.TrackId = ii.TrackId
+GROUP BY t.TrackId
+ORDER BY PurchaseCount DESC
+LIMIT 3;
+
+--Find the customer who has spent the most in total:
+SELECT c.FirstName || ' ' || c.LastName AS CustomerName, SUM(ii.UnitPrice * ii.Quantity) AS TotalSpent
+FROM chinook.customers c
+JOIN invoices i ON c.CustomerId = i.CustomerId
+JOIN invoice_items ii ON i.InvoiceId = ii.InvoiceId
+GROUP BY c.CustomerId
+ORDER BY TotalSpent DESC
+LIMIT 1;
+
+--How can these results answer business problems or help a business out?
+--These insights support businesses in optimizing operations, enhancing customer satisfaction, and driving revenue growth through data-driven decisions. Specifically, a query on 
+the top 3 genres with highest sales helps tailor marketing and inventory strategies to match customer preferences. Information on customer purchasing globally identifies engaged 
+customers for targeted marketing and loyalty programs. Data on average tracks per album Guides decisions on album composition, pricing, and packaging. A query focusing on the top
+3 bestselling albums allocates resources effectively and informs artist collaborations. Data on the total sales per year reveals sales trends for budgeting and resource allocation. 
+Finally a query focusing on the top 3 purchased tracks guides playlist creation, marketing, and licensing decisions while data on the highest spending customer enables 
+personalized customer experiences and loyalty rewards.
